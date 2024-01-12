@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet,LogBox } from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 const EditNote = ({ route, navigation }) => {
   const { header, body, onSave } = route.params;
@@ -17,12 +18,18 @@ const EditNote = ({ route, navigation }) => {
   return (
 
     <View style={styles.container}>
-        <View></View>
-      <Text>Edit Note</Text>
+        <View style={styles.headerbox}>
+<TouchableOpacity onPress={()=>navigation.goBack()}>
+<Icon name="arrow-back" size={30}/>
+</TouchableOpacity>
+         <Text style={styles.headertext}>Back to Notes</Text>   
+        </View>
+        <View style={styles.editcontainer}>
+      <Text style={{color:'green'}}>Edit Note</Text>
       <TextInput
         style={styles.editInput}
         value={editedHeader}
-        placeholder="Edit Header"
+        placeholder="Edit Title"
         onChangeText={(text) => setEditedHeader(text)}
       />
       <TextInput
@@ -32,8 +39,9 @@ const EditNote = ({ route, navigation }) => {
         onChangeText={(text) => setEditedBody(text)}
       />
       <TouchableOpacity style={styles.editButton} onPress={handleSave}>
-        <Text>Save</Text>
+        <Text style={{color:'white',fontWeight:'bold'}}>Save</Text>
       </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -44,13 +52,30 @@ const styles = StyleSheet.create({
     padding: 8,
     backgroundColor: '#fff',
   },
+  headerbox:{
+width:'100%',
+height:'5%',
+borderBottomColor:'green',
+borderBottomWidth:1,
+flexDirection:'row',
+justifyContent:'space-between'
+
+  },
+  headertext:{
+textAlign:'center',
+fontSize:20,
+fontWeight:'900',
+  },
+  editcontainer:{
+marginTop:10,
+  },
   editInput: {
     height: 40,
     borderColor: 'gray',
     borderWidth: 1,
-    
     marginBottom: 8,
     padding: 8,
+    marginTop:10
   },
   editInputbody:{
     height: 80,

@@ -157,12 +157,13 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
-    marginTop: -20,
+    marginTop: -10,
+    alignItems:'center'
   },
   textStyle: {
     fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 16,
+    fontWeight: '900',
+    textAlign:'center'
   },
   searchBar: {
     padding: 10,
