@@ -20,12 +20,12 @@ const EditNote = ({ route, navigation }) => {
     <View style={styles.container}>
         <View style={styles.headerbox}>
 <TouchableOpacity onPress={()=>navigation.goBack()}>
-<Icon name="arrow-back" size={30}/>
+<Icon name="arrow-back" size={30} style={styles.backIcon}/>
 </TouchableOpacity>
          <Text style={styles.headertext}>Back to Notes</Text>   
         </View>
         <View style={styles.editcontainer}>
-      <Text style={{color:'green'}}>Edit Note</Text>
+      <Text style={{color:'green',fontWeight:'900',letterSpacing:3}}>Edit Note</Text>
       <TextInput
         style={styles.editInput}
         value={editedHeader}
@@ -60,6 +60,9 @@ borderBottomWidth:1,
 flexDirection:'row',
 justifyContent:'space-between'
 
+  },
+  backIcon:{
+color:'green'
   },
   headertext:{
 textAlign:'center',

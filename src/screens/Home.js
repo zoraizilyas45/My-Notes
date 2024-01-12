@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet, TouchableOpacity, TextInput, Alert } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
@@ -11,6 +10,7 @@ const Home = ({ navigation }) => {
   const notes = useSelector((state) => state.note.data);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
+  const [longPressedItem, setLongPressedItem] = useState(null);
 
   useEffect(() => {
     const loadNotes = async () => {
@@ -42,6 +42,7 @@ const Home = ({ navigation }) => {
   const flatListData = searchQuery.length > 0 ? searchResults : notes;
 
   const renderNoteItem = ({ item, index }) => (
+    <View style={{width:'48%'}}>
     <TouchableOpacity
       style={styles.item}
       onPress={() =>
@@ -51,31 +52,24 @@ const Home = ({ navigation }) => {
           onSave: (editedHeader, editedBody) => handleEdit(index, editedHeader, editedBody),
         })
       }
+      onLongPress={() => setLongPressedItem(index)}
     >
       <View>
         <Text style={styles.noteHeader}>{item.header}</Text>
         <Text style={styles.noteBody} numberOfLines={5} ellipsizeMode="tail">
           {item.body}
         </Text>
-      </View>
-      <View style={styles.iconContainer}>
-        <TouchableOpacity
-          style={styles.editIcon}
-          onPress={() =>
-            navigation.navigate('EditNote', {
-              header: item.header,
-              body: item.body,
-              onSave: (editedHeader, editedBody) => handleEdit(index, editedHeader, editedBody),
-            })
-          }
-        >
-          <Icon name="pencil" size={20} color="#fff" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.deleteButton} onPress={() => dispatch(deleteNote(index))}>
-          <Icon name="trash" size={20} color="#fff" />
-        </TouchableOpacity>
-      </View>
+      
+      {longPressedItem === index && (
+        <View style={styles.iconContainer}>
+          <TouchableOpacity style={styles.deleteButton} onPress={() => handleDelete(index)}>
+            <Icon name="trash" size={20} color="#fff" />
+          </TouchableOpacity>
+        </View>
+        
+      )}</View>
     </TouchableOpacity>
+    </View>
   );
 
   const handleEdit = (index, header, body) => {
@@ -87,21 +81,26 @@ const Home = ({ navigation }) => {
     dispatch(updateNote({ index, updatedNote }));
 
     if (header !== undefined && body !== undefined) {
-      setSearchQuery(''); 
+      setSearchQuery('');
     }
   };
 
-  const handleSearch = () => {
+  const handleDelete = (index) => {
+    setLongPressedItem(null);
+    dispatch(deleteNote(index));
+  };
+
+  const handleSearch = (text) => {
     const results = notes.filter(
       (note) =>
-        note.header.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        note.body.toLowerCase().includes(searchQuery.toLowerCase())
+        note.header.toLowerCase().includes(text.toLowerCase()) ||
+        note.body.toLowerCase().includes(text.toLowerCase())
     );
 
     setSearchResults(results);
 
     if (results.length === 0) {
-      Alert.alert('Not Found', 'No notes found with the given search query.');
+      Alert.alert('Not Found any similar note');
     }
   };
 
@@ -124,11 +123,11 @@ const Home = ({ navigation }) => {
           style={styles.searchInput}
           placeholder="Search Note..."
           value={searchQuery}
-          onChangeText={(text) => setSearchQuery(text)}
+          onChangeText={(text) => {
+            setSearchQuery(text);
+            handleSearch(text);
+          }}
         />
-        <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
-          <Text style={styles.searchButtonText}>Search</Text>
-        </TouchableOpacity>
       </View>
 
       <FlatList
@@ -158,12 +157,12 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
     marginTop: -10,
-    alignItems:'center'
+    alignItems: 'center',
   },
   textStyle: {
     fontSize: 18,
     fontWeight: '900',
-    textAlign:'center'
+    textAlign: 'center',
   },
   searchBar: {
     padding: 10,
@@ -176,6 +175,7 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     padding: 10,
     width: '80%',
+    borderColor:'green'
   },
   item: {
     flexDirection: 'row',
@@ -184,7 +184,7 @@ const styles = StyleSheet.create({
     margin: 5,
     padding: 10,
     height: 150,
-    width: '48%',
+    //width: '48%',
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 8,
@@ -205,44 +205,16 @@ const styles = StyleSheet.create({
   },
   iconContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
-  },
-  editIcon: {
-    backgroundColor: '#007BFF',
-    borderRadius: 50,
-    padding: 5,
-    marginRight: 5,
-  },
-  editableForm: {
-    backgroundColor: '#fff',
-    padding: 10,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#ccc',
-  },
-  editInput: {
-    height: 40,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 8,
-    marginBottom: 8,
-    padding: 8,
-  },
-  editButton: {
-    backgroundColor: '#007BFF',
-    borderRadius: 8,
-    padding: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
+    marginTop:2
   },
   floatingButton: {
     position: 'absolute',
-    bottom: 16,
+    bottom: 25,
     right: 16,
-    backgroundColor: '#007BFF',
+    backgroundColor: 'green',
     borderRadius: 50,
-    width: 50,
-    height: 50,
+    width: 60,
+    height: 60,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -250,19 +222,8 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 24,
     fontWeight: 'bold',
-  },
-  searchButton: {
-    padding: 10,
-    backgroundColor: '#007BFF',
-    borderRadius: 15,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginLeft: 10,
-    marginTop: 10,
-  },
-  searchButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
+    textAlign:'center',
+    color:'white'
   },
 });
 
