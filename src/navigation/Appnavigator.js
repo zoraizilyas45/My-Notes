@@ -5,6 +5,7 @@ import Home from '../screens/Home';
 
 import EditNote from '../screens/EditNote';
 
+
 const Stack = createStackNavigator();
 
 function MyStack() {
@@ -19,11 +20,11 @@ function MyStack() {
     initialRouteName='Signin'
     >
       
-        
       <Stack.Screen name="Signin" component={Signin} />
       <Stack.Screen name="Signup" component={Signup} />
       <Stack.Screen name="Home" component={Home} />
       <Stack.Screen name="EditNote" component={EditNote}/>
+      
      
     </Stack.Navigator>
   );
