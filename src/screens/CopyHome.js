@@ -14,17 +14,17 @@ const Home = ({ navigation }) => {
   const [longPressedItem, setLongPressedItem] = useState(null);
   const [signingOut, setSigningOut] = useState(false);
 
- 
+  const userNotesKey = `notes_${auth().currentUser.uid}`;
 
   useEffect(() => {
     const loadNotes = async () => {
       try {
-        const storedNotes = await AsyncStorage.getItem('notes');
+        const storedNotes = await AsyncStorage.getItem(userNotesKey);
         if (storedNotes) {
           dispatch(setNotes(JSON.parse(storedNotes)));
         }
       } catch (error) {
-        console.error('Error loading notes from AsyncStorage:', error);
+        console.error('Error loading notes:', error);
       }
     };
 
@@ -34,9 +34,9 @@ const Home = ({ navigation }) => {
   useEffect(() => {
     const saveNotes = async () => {
       try {
-        await AsyncStorage.setItem('notes', JSON.stringify(notes));
+        await AsyncStorage.setItem(userNotesKey, JSON.stringify(notes));
       } catch (error) {
-        console.error('Error saving notes to AsyncStorage:', error);
+        console.error('Error saving notes:', error);
       }
     };
 
@@ -46,35 +46,35 @@ const Home = ({ navigation }) => {
   const flatListData = searchQuery.length > 0 ? searchResults : notes;
 
   const renderNoteItem = ({ item, index }) => (
-    <View style={styles.itemContainer}>
-      <TouchableOpacity
-        style={styles.item}
-        onPress={() =>
-          navigation.navigate('EditNote', {
-            header: item.header,
-            body: item.body,
-            onSave: (editedHeader, editedBody) => handleEdit(index, editedHeader, editedBody),
-          })
-        }
-        onLongPress={() => setLongPressedItem(index)}
-      >
-        <View>
-          <Text style={styles.noteHeader}>{item.header}</Text>
-          <Text style={styles.noteBody} numberOfLines={10} ellipsizeMode="tail">
-            {item.body}
-          </Text>
+    <View style={{width:'48%',marginLeft:8}}>
+    <TouchableOpacity
+      style={styles.item}
+      onPress={() =>
+        navigation.navigate('EditNote', {
+          header: item.header,
+          body: item.body,
+          onSave: (editedHeader, editedBody) => handleEdit(index, editedHeader, editedBody),
+        })
+      }
+      onLongPress={() => setLongPressedItem(index)}
+    >
+      <View>
+        <Text style={styles.noteHeader}>{item.header}</Text>
+        <Text style={styles.noteBody} numberOfLines={5} ellipsizeMode="tail">
+          {item.body}
+        </Text>
+      
+      {longPressedItem === index && (
+        <View style={styles.iconContainer}>
+          <TouchableOpacity style={styles.deleteButton} onPress={() => handleDelete(index)}>
+            <Icon name="trash" size={20} color="#fff"  />
+          </TouchableOpacity>
         </View>
-        {longPressedItem === index && (
-          <View style={styles.iconContainer}>
-            <TouchableOpacity style={styles.deleteButton} onPress={() => handleDelete(index)}>
-              <Icon name="trash" size={20} color="#fff" />
-            </TouchableOpacity>
-          </View>
-        )}
-      </TouchableOpacity>
-      </View>
+        
+      )}</View>
+    </TouchableOpacity>
+    </View>
   );
-  
 
   const handleEdit = (index, header, body) => {
     const updatedNote = {
@@ -107,12 +107,14 @@ const Home = ({ navigation }) => {
     //   Alert.alert('Not Found any similar note');
     // }
   };
+
   const handleSignOut = async () => {
     try {
       setSigningOut(true);
   
-      await auth().signOut();
+      await AsyncStorage.removeItem(userNotesKey);
   
+      await auth().signOut();
       setSigningOut(false);
       navigation.replace('Signin');
     } catch (error) {
@@ -120,9 +122,6 @@ const Home = ({ navigation }) => {
       setSigningOut(false);
     }
   };
-  
-  
-  
   
 
 
@@ -155,7 +154,7 @@ const Home = ({ navigation }) => {
       {signingOut ? (
         <ActivityIndicator size="small" color="#fff" />
       ) : (
-        <Icon name="sign-out" size={35} color="#fff" />
+        <Icon name="sign-out" size={29} color="#fff" />
       )}
     </TouchableOpacity>
     </View>
@@ -166,7 +165,7 @@ const Home = ({ navigation }) => {
       keyExtractor={(item, index) => index.toString()}
       numColumns={2}
       showsVerticalScrollIndicator={false}
-     
+      contentContainerStyle={styles.flatListContent}
     />
     </View>
 <TouchableOpacity style={styles.floatingButton} onPress={navigateToNotes}>
@@ -208,7 +207,7 @@ const styles = StyleSheet.create({
     flexDirection:'row'
   },
   searchInput: {
-    height: 60,
+    height: 50,
     borderColor: '#ccc',
     borderWidth: 1,
     borderRadius: 45,
@@ -227,33 +226,24 @@ const styles = StyleSheet.create({
     color:'#fdf7e4'
   },
 
-  itemContainer: {
-   
-    margin: 4,
-    //backgroundColor:'red'
-    
-  },
-
   item: {
     flexDirection: 'column',
     justifyContent: 'space-between',
-    //alignItems: 'center',
-    padding: 10,
-    height: 260,
-    width: 180,
+    alignItems: 'center',  
+    margin: 3,
+    padding: 12,
+    height: 250,
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 25,
     backgroundColor: '#be8f01',
     
-    
-    
   },
   
  
   iconContainer: {
-    bottom: 0,
-    right: 0,
+    bottom: 5,
+    right: 5,
     zIndex: 1,
     alignSelf: 'flex-end', 
   },
@@ -299,8 +289,8 @@ borderColor: '#FFFDD0',
   },
   signoutButton: {
     position: 'absolute',
-    top: 14,
-    right: 25,
+    top: 13,
+    right: 30,
     backgroundColor: 'orange',
     borderRadius: 8,
     padding: 8,
@@ -310,10 +300,10 @@ borderColor: '#FFFDD0',
 
   centerContainer: {
     flex: 1,
-   // justifyContent: 'center',
-    //alignItems: 'center',
+    justifyContent: 'center',
+    alignItems: 'center',
     width: '100%', 
-    left:1
+    left:-4
   },
   flatListContent: {
     flexGrow: 1,
